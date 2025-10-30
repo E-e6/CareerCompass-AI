@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CareerCompass AI</title>
+<style>
+body{font-family:Arial;margin:20px;color:#111}
+.card{border:1px solid #ddd;padding:16px;border-radius:8px;margin-bottom:12px;box-shadow:0 2px 6px rgba(0,0,0,0.05)}
+textarea{width:100%;height:120px}
+button{padding:8px 12px;margin-top:8px}
+</style>
+</head>
+<body>
+<h1>CareerCompass AI — Demo</h1>
+<div class="card">
+<h2>Resume Analyzer</h2>
+<textarea id="resumeText">Built Python data pipeline and led a 3-person project to analyze student finance data.</textarea>
+<button onclick="analyzeResume()">Analyze Resume</button>
+<pre id="resumeResult"></pre>
+</div>
+
+<div class="card">
+<h2>Finance Projection</h2>
+<label>Income <input id="income" type="number" value="1000"></label>
+<label>Expenses <input id="expenses" type="number" value="600"></label>
+<label>Months <input id="months" type="number" value="6"></label>
+<button onclick="runFinance()">Run</button>
+<pre id="financeResult"></pre>
+</div>
+
+<div class="card">
+<h2>Team Goals</h2>
+<input id="goalTitle" placeholder="Goal title">
+<input id="goalProgress" type="number" min="0" max="100" value="0">
+<button onclick="addGoal()">Add Goal</button>
+<pre id="goalsList"></pre>
+</div>
+
+<script>
+async function analyzeResume(){
+  const text=document.getElementById('resumeText').value;
+  const r=await fetch('/api/resume-analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+  document.getElementById('resumeResult').textContent=JSON.stringify(await r.json(),null,2);
+}
+async function runFinance(){
+  const data={income:+income.value,monthly_expenses:+expenses.value,months:+months.value};
+  const r=await fetch('/api/finance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  document.getElementById('financeResult').textContent=JSON.stringify(await r.json(),null,2);
+}
+async function addGoal(){
+  const data={title:goalTitle.value,progress:+goalProgress.value};
+  await fetch('/api/team-goals',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  loadGoals();
+}
+async function loadGoals(){
+  const r=await fetch('/api/team-goals');
+  document.getElementById('goalsList').textContent=JSON.stringify(await r.json(),null,2);
+}
+window.onload=loadGoals;
+</script>
+</body>
+</html>
